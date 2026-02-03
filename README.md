@@ -138,6 +138,80 @@ Press Ok.
 And finally "restart now".
 
 
+# Phase 5: Advanced Infrastructure Management
+
+1. Identity & Access Management (IAM)
+
+**User Provisioning**: Created domain user.
+- **RBAC (Role-Based Access Control)**: Created a security group `IT_Staff` and assigned members to streamline permission management.
+- **Verification**: Successfully initialized a new user profile on `PC1` via domain authentication.
+
+  
+
+
+<img width="1919" height="604" alt="Screenshot 2026-02-03 085622" src="https://github.com/user-attachments/assets/52778436-8c1b-4b40-b331-efe80a0bdada" />
+
+
+2. Enterprise File Services (SMB)
+
+- **Configuration**: Defined a `[Public]` share in `smb.conf` with a physical path at `/srv/samba/public`.
+- **Accessibility**: Verified that the share is accessible via UNC path `\\10.0.0.10\Public` from any domain-joined workstation.
+- **Data Persistence**: Confirmed write permissions by creating test documentation from the Windows client.
+
+
+<img width="479" height="230" alt="Screenshot 2026-02-03 090438" src="https://github.com/user-attachments/assets/0c3119ab-6338-4b05-a2e7-a233216c8ef7" />
+
+
+3. Disaster Recovery & Maintenance
+
+- **Backup Strategy**: Implemented online database snapshots using `samba-tool domain backup`.
+- **Storage**: Backups are securely archived in the `/backups` directory to ensure business continuity.
+
+
+
+
+
+<img width="941" height="359" alt="Screenshot 2026-02-03 090737" src="https://github.com/user-attachments/assets/42158395-0508-496a-a4dc-08efb2fdc496" />
+
+
+
+<img width="1558" height="103" alt="Screenshot 2026-02-03 091201" src="https://github.com/user-attachments/assets/974cbc6c-bcd4-4088-aaa7-2d45e0ec014f" />
+
+
+Troubleshooting & Debugging (Lessons Learned)
+
+### Issue 1: Samba Backup Command Failure
+- **Error**: The command `samba-tool domain backup local` was rejected by the system.
+- **Solution**: Identified that for live environments, the `online` parameter must be used along with explicit server and user identification.
+- **Fix**: Executed `sudo samba-tool domain backup online --targetdir=/backups --server=127.0.0.1 -U administrator`.
+
+### Issue 2: SMB Share Access Denied
+- **Error**: The Windows client could see the `[Public]` folder but lacked permissions to create or edit files.
+- **Solution**: Found that Linux filesystem permissions (owner/mode) were more restrictive than the Samba share configuration.
+- **Fix**: Synchronized permissions using `sudo chmod -R 0777 /srv/samba/public` and verified `read only = no` in `smb.conf`.
+
+
+
+<img width="1919" height="117" alt="Screenshot 2026-02-03 091247" src="https://github.com/user-attachments/assets/2b2d0a9a-6594-4d6b-9121-914e09afd606" />
+
+
+
+
+Universal Network Access
+By entering the Domain Controller's IP address, any domain-joined user can instantly access the shared resources:
+
+Universal Path: Accessing \\10.0.0.10\Public allows all authorized users to collaborate in a single directory.
+
+Cross-User Availability: As demonstrated, the share is visible and functional for all domain members, ensuring a unified corporate file environment.
+
+
+
+<img width="839" height="499" alt="Screenshot 2026-02-03 093942" src="https://github.com/user-attachments/assets/f61a63e1-75b3-4f2e-be13-f07cfec78e3c" />
+
+Proving that the network share is globally accessible across the domain by simply using the server's IP address.
+
+
+
 
 
 
